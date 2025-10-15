@@ -33,7 +33,7 @@ public class SchemaDefinition {
     String type;
 
     @SerializedName("properties")
-    Map<String, Map<String, String>> properties = new HashMap<>();
+    Map<String, Map<String, Object>> properties = new HashMap<>();
 
     @SerializedName("required")
     Set<String> required = new HashSet<>();
@@ -46,11 +46,11 @@ public class SchemaDefinition {
         this.type = type;
     }
 
-    public Map<String, Map<String, String>> getProperties() {
+    public Map<String, Map<String, Object>> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, Map<String, String>> properties) {
+    public void setProperties(Map<String, Map<String, Object>> properties) {
         this.properties = properties;
     }
 

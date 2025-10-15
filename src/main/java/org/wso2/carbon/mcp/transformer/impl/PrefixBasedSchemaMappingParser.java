@@ -71,7 +71,7 @@ public class PrefixBasedSchemaMappingParser implements SchemaMappingParser {
      * @return the mapped schema
      */
     private static SchemaMapping processSchemaProperties(SchemaDefinition schemaDefinition) {
-        Map<String, Map<String, String>> properties = schemaDefinition.getProperties();
+        Map<String, Map<String, Object>> properties = schemaDefinition.getProperties();
 
         Set<String> required = schemaDefinition.getRequired();
 
@@ -80,12 +80,12 @@ public class PrefixBasedSchemaMappingParser implements SchemaMappingParser {
         List<Param> headerParams = new ArrayList<>();
         List<Param> pathParams = new ArrayList<>();
 
-        for (Map.Entry<String, Map<String, String>> entry : properties.entrySet()) {
+        for (Map.Entry<String, Map<String, Object>> entry : properties.entrySet()) {
             String key = entry.getKey();
-            Map<String, String> value = entry.getValue();
+            Map<String, Object> value = entry.getValue();
 
             if (ResolverConstants.REQUEST_BODY_KEY.equalsIgnoreCase(key)) {
-                String contentType = value.get(ResolverConstants.CONTENT_TYPE_KEY);
+                String contentType = (String) value.get(ResolverConstants.CONTENT_TYPE_KEY);
                 schemaMapping.setContentType(contentType);
                 schemaMapping.setHasBody(true);
                 continue;
@@ -106,16 +106,16 @@ public class PrefixBasedSchemaMappingParser implements SchemaMappingParser {
 
             switch(paramType) {
                 case "query":
-                    queryParams.add(new Param(paramName, value.get(ResolverConstants.FORMAT_KEY),
-                            value.get(ResolverConstants.DESCRIPTION_KEY), isRequired));
+                    queryParams.add(new Param(paramName, (String) value.get(ResolverConstants.FORMAT_KEY),
+                            (String) value.get(ResolverConstants.DESCRIPTION_KEY), isRequired));
                     break;
                 case "header":
-                    headerParams.add(new Param(paramName, value.get(ResolverConstants.FORMAT_KEY),
-                            value.get(ResolverConstants.DESCRIPTION_KEY), isRequired));
+                    headerParams.add(new Param(paramName, (String) value.get(ResolverConstants.FORMAT_KEY),
+                            (String) value.get(ResolverConstants.DESCRIPTION_KEY), isRequired));
                     break;
                 case "path":
-                    pathParams.add(new Param(paramName, value.get(ResolverConstants.FORMAT_KEY),
-                            value.get(ResolverConstants.DESCRIPTION_KEY), isRequired));
+                    pathParams.add(new Param(paramName, (String) value.get(ResolverConstants.FORMAT_KEY),
+                            (String) value.get(ResolverConstants.DESCRIPTION_KEY), isRequired));
                     break;
                 default:
                     if (log.isDebugEnabled()) {
