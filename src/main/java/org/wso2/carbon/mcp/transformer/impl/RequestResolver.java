@@ -72,7 +72,8 @@ public class RequestResolver {
                 //trim and url encode the path param value
                 String encodedPathParam = null;
                 try {
-                    encodedPathParam = URLEncoder.encode(paramValue.trim(), String.valueOf(StandardCharsets.UTF_8));
+                    encodedPathParam = URLEncoder.encode(paramValue.trim(), String.valueOf(StandardCharsets.UTF_8))
+                            .replace("+", "%20");
                 } catch (UnsupportedEncodingException e) {
                     String msg = "Unsupported encoding exception while encoding path parameter: " + pathParam.getName();
                     log.error(msg);
