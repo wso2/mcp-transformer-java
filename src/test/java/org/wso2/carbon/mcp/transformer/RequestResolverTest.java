@@ -18,7 +18,16 @@
 
 package org.wso2.carbon.mcp.transformer;
 
+import org.apache.commons.io.IOUtils;
+import org.junit.Assert;
+import org.junit.Test;
+import org.wso2.carbon.mcp.transformer.impl.PrefixBasedSchemaMappingParser;
+import org.wso2.carbon.mcp.transformer.impl.RequestResolver;
+import org.wso2.carbon.mcp.transformer.model.ResolvedRequest;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Test class for RequestResolver.
@@ -52,4 +61,35 @@ public class RequestResolverTest {
 //        Assert.assertEquals(1, headerParams.size());
 //        Assert.assertEquals("456", headerParams.get("OrgID"));
 //    }
+
+    @Test
+    public void testPathParamWithSpacesIsPercentEncoded() throws Exception {
+        ResolvedRequest resolvedRequest = resolveWithoutBody(Map.of("id", "HP  1234567890"));
+
+        // Spaces must become %20, not '+', which a backend reads as a literal plus sign in a URL path
+        Assert.assertEquals("HP%20%201234567890", resolvedRequest.getPathParams().get("id"));
+    }
+
+    @Test
+    public void testPathParamWithLiteralPlusIsEncoded() throws Exception {
+        ResolvedRequest resolvedRequest = resolveWithoutBody(Map.of("id", "a+b c"));
+
+        Assert.assertEquals("a%2Bb%20c", resolvedRequest.getPathParams().get("id"));
+    }
+
+    @Test
+    public void testQueryParamWithSpacesIsPercentEncoded() throws Exception {
+        ResolvedRequest resolvedRequest = resolveWithoutBody(Map.of("id", "123", "query", "first name:John"));
+
+        Assert.assertEquals("123", resolvedRequest.getPathParams().get("id"));
+        Assert.assertEquals("first%20name%3AJohn", resolvedRequest.getQueryParams().get("query"));
+    }
+
+    private ResolvedRequest resolveWithoutBody(Map<String, Object> inputArguments) throws Exception {
+        String schemaJson = IOUtils.toString(Objects.requireNonNull(
+                getClass().getClassLoader().getResourceAsStream("schema-no-request-body.json")),
+                StandardCharsets.UTF_8);
+        RequestResolver requestResolver = new RequestResolver(new PrefixBasedSchemaMappingParser());
+        return requestResolver.resolve(schemaJson, inputArguments);
+    }
 }
