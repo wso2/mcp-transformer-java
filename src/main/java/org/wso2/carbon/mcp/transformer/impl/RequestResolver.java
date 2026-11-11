@@ -92,7 +92,7 @@ public class RequestResolver {
                 //trim and url encode the path param value
                 String encodedPathParam = null;
                 try {
-                    encodedPathParam = URLEncoder.encode(paramValue.trim(), String.valueOf(StandardCharsets.UTF_8));
+                    encodedPathParam = encodeUrlComponent(paramValue.trim());
                 } catch (UnsupportedEncodingException e) {
                     String msg = "Unsupported encoding exception while encoding path parameter: " + pathParam.getName();
                     log.error(msg);
@@ -138,7 +138,7 @@ public class RequestResolver {
             // Trim and url encode the query param value
             String encodedQueryParam = null;
             try {
-                encodedQueryParam = URLEncoder.encode(paramValue.trim(), String.valueOf(StandardCharsets.UTF_8));
+                encodedQueryParam = encodeUrlComponent(paramValue.trim());
             } catch (UnsupportedEncodingException e) {
                 String msg = "Unsupported encoding exception while encoding query parameter: " + queryParam.getName();
                 log.error(msg);
@@ -200,6 +200,22 @@ public class RequestResolver {
                 throw new MCPRequestResolverException(msg);
             }
         }
+    }
+
+    /**
+     * Percent-encodes a parameter value so that it can be placed in a URL path segment or query string.
+     * <p>
+     * {@link URLEncoder} implements application/x-www-form-urlencoded encoding, which writes a space as '+'.
+     * In a URL path, '+' is a literal plus sign, so a value such as "HP 123" would reach the backend as "HP+123".
+     * Spaces are therefore encoded as "%20", which is valid in both the path and the query string (RFC 3986).
+     * A literal '+' in the value is still encoded as "%2B".
+     *
+     * @param value value to encode
+     * @return the percent-encoded value
+     * @throws UnsupportedEncodingException if UTF-8 is not supported
+     */
+    private static String encodeUrlComponent(String value) throws UnsupportedEncodingException {
+        return URLEncoder.encode(value, StandardCharsets.UTF_8.name()).replace("+", "%20");
     }
 
 }
